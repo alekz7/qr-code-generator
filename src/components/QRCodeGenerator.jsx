@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { QrCode, Link, MessageSquare, User, Download, Copy, Check } from 'lucide-react';
+import { QrCode, Link, MessageSquare, User, Download, Copy, Check, Sun, Moon } from 'lucide-react';
 import { useTranslations } from '../hooks/useTranslations';
 
 const QRCodeGenerator = () => {
   const { t } = useTranslations();
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize theme from localStorage or system preference
+    return localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
   const [activeTab, setActiveTab] = useState('url');
   const [qrData, setQrData] = useState('');
   const [copied, setCopied] = useState(false);
@@ -208,8 +212,25 @@ END:VCARD`;
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-4 dark:from-gray-800 dark:via-gray-900 dark:to-black">
       <div className="max-w-4xl mx-auto">
+        <div className="flex justify-end mb-4"> {/* Flex container for the toggle button */}
+          <button
+            onClick={() => {
+              window.toggleTheme();
+              // Force re-render to update theme-dependent styles if necessary
+              // Although Tailwind's dark mode should handle this automatically
+              // We can add a state here if we want to change the icon dynamically
+              // based on the current theme.
+              const currentTheme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              setIsDarkMode(currentTheme === 'dark');
+            }}
+            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+        </div>
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl mb-4">
             <QrCode className="w-8 h-8 text-white" />
@@ -217,12 +238,12 @@ END:VCARD`;
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
             {t('appTitle')}
           </h1>
-          <p className="text-gray-600 text-lg">{t('appDescription')}</p>
+          <p className="text-gray-600 text-lg dark:text-gray-300">{t('appDescription')}</p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex">
               {tabs.map((tab) => {
                 const IconComponent = tab.icon;
@@ -232,8 +253,8 @@ END:VCARD`;
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-medium transition-all duration-200 ${
                       activeTab === tab.id
-                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                        ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50 dark:bg-gray-700 dark:text-purple-400 dark:border-purple-400'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
                     }`}
                   >
                     <IconComponent className="w-4 h-4" />
@@ -248,7 +269,7 @@ END:VCARD`;
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Input Section */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   {activeTab === 'url' && t('enterUrl')}
                   {activeTab === 'text' && t('enterText')}
                   {activeTab === 'contact' && t('contactInformation')}
@@ -257,7 +278,7 @@ END:VCARD`;
                 {/* URL Input */}
                 {activeTab === 'url' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('websiteUrl')}
                     </label>
                     <input
@@ -265,9 +286,9 @@ END:VCARD`;
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
                       placeholder={t('urlPlaceholder')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {t('urlHelp')}
                     </p>
                   </div>
@@ -276,7 +297,7 @@ END:VCARD`;
                 {/* Text Input */}
                 {activeTab === 'text' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('textContent')}
                     </label>
                     <textarea
@@ -284,7 +305,7 @@ END:VCARD`;
                       onChange={(e) => setTextInput(e.target.value)}
                       placeholder={t('textPlaceholder')}
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 resize-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                     />
                   </div>
                 )}
@@ -294,7 +315,7 @@ END:VCARD`;
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('firstName')}
                         </label>
                         <input
@@ -302,11 +323,11 @@ END:VCARD`;
                           value={contactInfo.firstName}
                           onChange={(e) => setContactInfo({...contactInfo, firstName: e.target.value})}
                           placeholder={t('firstNamePlaceholder')}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('lastName')}
                         </label>
                         <input
@@ -314,13 +335,13 @@ END:VCARD`;
                           value={contactInfo.lastName}
                           onChange={(e) => setContactInfo({...contactInfo, lastName: e.target.value})}
                           placeholder={t('lastNamePlaceholder')}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('phoneNumber')}
                       </label>
                       <input
@@ -328,12 +349,12 @@ END:VCARD`;
                         value={contactInfo.phone}
                         onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})}
                         placeholder={t('phonePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('emailAddress')}
                       </label>
                       <input
@@ -341,12 +362,12 @@ END:VCARD`;
                         value={contactInfo.email}
                         onChange={(e) => setContactInfo({...contactInfo, email: e.target.value})}
                         placeholder={t('emailPlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('organization')}
                       </label>
                       <input
@@ -354,12 +375,12 @@ END:VCARD`;
                         value={contactInfo.organization}
                         onChange={(e) => setContactInfo({...contactInfo, organization: e.target.value})}
                         placeholder={t('organizationPlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('website')}
                       </label>
                       <input
@@ -367,7 +388,7 @@ END:VCARD`;
                         value={contactInfo.url}
                         onChange={(e) => setContactInfo({...contactInfo, url: e.target.value})}
                         placeholder={t('websitePlaceholder')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                       />
                     </div>
                   </div>
@@ -383,22 +404,22 @@ END:VCARD`;
 
               {/* QR Code Display Section */}
               <div className="flex flex-col items-center space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-800">{t('generatedQrCode')}</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">{t('generatedQrCode')}</h2>
                 
-                <div className="bg-gray-50 rounded-2xl p-8 w-full max-w-sm">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-8 w-full max-w-sm">
                   {qrData ? (
                     <div className="text-center">
                       <div ref={qrContainerRef} className="flex justify-center">
                         {/* QR code will be dynamically inserted here */}
                       </div>
-                      <p className="text-sm text-gray-600 mt-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-4">
                         {t('scanQrCode')}
                       </p>
                     </div>
                   ) : (
                     <div className="text-center py-16">
-                      <QrCode className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">
+                      <QrCode className="w-16 h-16 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-gray-400">
                         {t('fillFormPrompt')}
                       </p>
                     </div>
@@ -436,8 +457,8 @@ END:VCARD`;
 
                 {qrData && (
                   <div className="w-full max-w-sm">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">{t('qrCodeData')}</h3>
-                    <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600 max-h-32 overflow-y-auto">
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('qrCodeData')}</h3>
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-300 max-h-32 overflow-y-auto">
                       <pre className="whitespace-pre-wrap break-words">{qrData}</pre>
                     </div>
                   </div>
@@ -447,7 +468,7 @@ END:VCARD`;
           </div>
         </div>
 
-        <div className="text-center mt-8 text-gray-500 text-sm">
+        <div className="text-center mt-8 text-gray-500 dark:text-gray-400 text-sm">
           <p>{t('footerText')}</p>
         </div>
       </div>
